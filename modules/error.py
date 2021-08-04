@@ -1,3 +1,4 @@
+from operator import is_not
 import discord
 import utils
 import core
@@ -11,6 +12,9 @@ class Errors(core.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandInvokeError):
+            error = error.original
+
         if isinstance(error, commands.CommandNotFound):
             return
         

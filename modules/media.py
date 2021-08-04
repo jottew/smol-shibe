@@ -4,26 +4,7 @@ import utils
 import core
 
 from bs4 import BeautifulSoup
-from pyppeteer import launch
 from discord.ext import commands
-
-class Browser:
-    def __init__(self, *args, **kwargs):
-        self.browser = None
-        self.args = args
-        self.kwargs = kwargs
-
-    async def __aenter__(self):
-        self.browser = await launch(
-            headless=True,
-            *self.args,
-            **self.kwargs
-        )
-
-        return self.browser
-
-    async def __aexit__(self, _type, val, tb):
-        await self.browser.close()
 
 class Media(core.Cog):
     def __init__(self, bot):
@@ -37,13 +18,14 @@ class Media(core.Cog):
         return item.get("href")
 
     async def get_shibe(self):
-        async with Browser() as browser:
-            page = await browser.newPage()
-            await page.goto("https://shib.es")
-            await asyncio.sleep(3)
-            source = await page.content()
+        browser = self.bot.browser
+        page = await browser.newPage()
+        await page.goto("https://shib.es")
+        await asyncio.sleep(3)
+        source = await page.content()
+        await page.close()
 
-            url = f"http://shib.es{await self.scrape_shibe(source)}"
+        url = f"http://shib.es{await self.scrape_shibe(source)}"
         return url
 
     @core.command(description="Fetches a shiba image from https://shib.es")
@@ -52,16 +34,18 @@ class Media(core.Cog):
         msg = await ctx.send("Fetching image from https://shib.es, this could take 3-10 seconds...")
 
         try:
-            url = await asyncio.wait_for(
-                self.get_shibe(),
-                timeout=30
-            )
+            with utils.Timer() as timer:
+                url = await asyncio.wait_for(
+                    self.get_shibe(),
+                    timeout=30
+                )
         except asyncio.TimeoutError:
             return await ctx.send("Fetching took over 30 seconds and has therefore been cancelled")
+        processed = timer.time
 
         em = discord.Embed(color=ctx.color)
         em.set_image(url=url)
-        await ctx.reply(embed=em)
+        await msg.edit(embed=em, content=f"Processed in `{utils.converters.time(int(processed), seconds=True)}`")
 
 def setup(bot):
     bot.add_cog(Media(bot))

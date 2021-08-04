@@ -11,3 +11,7 @@ from .executor import (
 from .checks import (
     is_general
 )
+
+from .timer import (
+    Timer
+)
