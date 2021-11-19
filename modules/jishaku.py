@@ -1,3 +1,4 @@
+import jishaku
 import psutil
 import sys
 import discord
@@ -7,6 +8,10 @@ from discord.ext import commands
 from jishaku.features.baseclass import Feature
 from jishaku.modules import package_version
 from jishaku.cog import STANDARD_FEATURES, OPTIONAL_FEATURES
+
+jishaku.Flags.HIDE = True
+jishaku.Flags.NO_DM_TRACEBACK = True
+jishaku.Flags.NO_UNDERSCORE = True
 
 class Jishaku(*OPTIONAL_FEATURES, *STANDARD_FEATURES):
 
