@@ -37,6 +37,9 @@ class Events(core.Cog):
 
     @commands.Cog.listener("on_message")
     async def emojis(self, msg):
+        if msg.author.bot:
+            return
+            
         matches = re.findall(self.REGEX, msg.content)
 
         if matches:
